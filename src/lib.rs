@@ -47,6 +47,17 @@ impl From<NixError> for Error {
 }
 
 pub struct FdLock<F: AsRawFd>(Option<F>);
+impl<F: AsRawFd> std::ops::Deref for FdLock<F> {
+    type Target = F;
+    fn deref(&self) -> &Self::Target {
+        self.0.as_ref().unwrap()
+    }
+}
+impl<F: AsRawFd> std::ops::DerefMut for FdLock<F> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.0.as_mut().unwrap()
+    }
+}
 impl<F: AsRawFd> FdLock<F> {
     pub fn lock(f: F, lock_type: LockType, blocking: bool) -> Result<Self, Error> {
         flock(
