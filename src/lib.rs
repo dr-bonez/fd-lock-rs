@@ -94,6 +94,9 @@ impl<F: AsRawFd> FdLock<F> {
         )?;
         Ok(FdLock(Some(f)))
     }
+    pub fn map<Func: FnOnce(F) -> F_, F_: AsRawFd>(mut self, map_fn: Func) -> FdLock<F_> {
+        FdLock(self.0.take().map(map_fn))
+    }
     pub fn unlock(mut self, blocking: bool) -> Result<F, (Self, Error)> {
         match flock(
             self.0.as_ref().unwrap().as_raw_fd(),
