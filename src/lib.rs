@@ -1,3 +1,4 @@
+use std::io::{Error as IOError, ErrorKind as IOErrorKind};
 use std::os::unix::io::AsRawFd;
 
 use nix::{
@@ -29,10 +30,11 @@ impl std::fmt::Display for Error {
             InvalidOperation => write!(f, "File locking operation is invalid."),
             OutOfMemory => write!(f, "The kernel ran out of memory for allocating lock records."),
             WouldBlock => write!(f, "The file is locked and the blocking flag was set to false."),
-            Other(e) => write!(f, "Unexpected Error: {}", e),
+            Other(e) => write!(f, "Non-flock error: {}", e),
         }
     }
 }
+impl std::error::Error for Error {}
 impl From<NixError> for Error {
     fn from(e: NixError) -> Self {
         match e {
@@ -42,6 +44,17 @@ impl From<NixError> for Error {
             NixError::Sys(Errno::ENOLCK) => Error::OutOfMemory,
             NixError::Sys(nix::errno::EWOULDBLOCK) => Error::WouldBlock,
             _ => Error::Other(e),
+        }
+    }
+}
+impl From<Error> for IOError {
+    fn from(e: Error) -> IOError {
+        use Error::*;
+        match e {
+            InvalidFd | InvalidOperation => IOError::new(IOErrorKind::InvalidInput, e),
+            Interrupted => IOError::new(IOErrorKind::Interrupted, e),
+            OutOfMemory | Other(_) => IOError::new(IOErrorKind::Other, e),
+            WouldBlock => IOError::new(IOErrorKind::WouldBlock, e),
         }
     }
 }

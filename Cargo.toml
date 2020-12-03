@@ -1,6 +1,6 @@
 [package]
 name = "fd-lock-rs"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Aiden McClelland <me@drbonez.dev>"]
 edition = "2018"
 license = "MIT"
