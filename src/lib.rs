@@ -38,11 +38,11 @@ impl std::error::Error for Error {}
 impl From<NixError> for Error {
     fn from(e: NixError) -> Self {
         match e {
-            NixError::Sys(Errno::EBADF) => Error::InvalidFd,
-            NixError::Sys(Errno::EINTR) => Error::Interrupted,
-            NixError::Sys(Errno::EINVAL) => Error::InvalidOperation,
-            NixError::Sys(Errno::ENOLCK) => Error::OutOfMemory,
-            NixError::Sys(nix::errno::EWOULDBLOCK) => Error::WouldBlock,
+            Errno::EBADF => Error::InvalidFd,
+            Errno::EINTR => Error::Interrupted,
+            Errno::EINVAL => Error::InvalidOperation,
+            Errno::ENOLCK => Error::OutOfMemory,
+            Errno::EWOULDBLOCK => Error::WouldBlock,
             _ => Error::Other(e),
         }
     }
